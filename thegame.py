@@ -115,7 +115,11 @@ class Game:
 
     def possible_moves(self, player):
         # check to see if there are any possible moves for that player
-        return True
+        for pile_idx in range(0, 4):
+            for card_idx in range(0, len(player.hand)):
+                if check_play_validity(player, pile_idx, card_idx):
+                    return True
+        return False
 
     def check_play_validity(self, player, pile_idx, card_idx):
         pile = self.piles[pile_idx]
