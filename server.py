@@ -1,6 +1,9 @@
 import socket
 from _thread import *
 import sys
+from game import Game
+from player import Player
+import pickle
 
 # If this doens't work: Use ipconfig, then paste your IPV4 address here
 server = socket.gethostbyname(socket.gethostname())
@@ -13,29 +16,33 @@ try:
 except socket.error as e:
     str(e)
 
-s.listen(2)
+s.listen(5)
 print("Waiting for a connection, Server Started")
 
-s.listen(2)
+s.listen(5)
 print("Waiting for a connection, Server Started")
 
+# Initiate the game object
+game = Game(5)
 
 def threaded_client(conn):
-    conn.send(str.encode("Connected"))
+    conn.send(pickle.dumps(game))
     reply = ""
     while True:
         try:
-            data = conn.recv(2048)
-            reply = data.decode("utf-8")
+            # Get the new game data
+            data = pickle.loads(conn.recv(2048))
 
             if not data:
                 print("Disconnected")
                 break
             else:
-                print("Received: ", reply)
+                # Send back the updated game data
+                reply = data
+                print("Received: ", data)
                 print("Sending : ", reply)
 
-            conn.sendall(str.encode(reply))
+            conn.sendall(pickle.dumps(reply))
         except:
             break
 
@@ -43,8 +50,10 @@ def threaded_client(conn):
     conn.close()
 
 
+currentPlayer = 0
 while True:
     conn, addr = s.accept()
     print("Connected to:", addr)
 
-    start_new_thread(threaded_client, (conn,))
+    start_new_thread(threaded_client, (conn, currentPlayer))
+    currentPlayer += 1
