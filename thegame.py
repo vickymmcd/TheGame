@@ -1,5 +1,6 @@
 from random import randint
 import pygame
+from network import Network
 
 # represent a playing card in The Game
 class PlayingCard:
@@ -80,6 +81,7 @@ class Player:
 class Game:
     # piles 1 and 2 ascending, piles 3 & 4 descending
     def __init__(self, num_players):
+        self.network = Network()
         self.num_players = num_players
         self.deck = Deck()
         self.piles = [1, 1, 100, 100]
@@ -147,6 +149,8 @@ class Game:
 
     def run_gameplay(self):
         gameover = False
+        startState = read_state(self.network.getState())
+
         while not gameover:
             for player in self.players:
                 gameover = self.take_turn(player)
@@ -156,6 +160,15 @@ class Game:
             if len(self.deck.get_deck_list()) == 0:
                 print("Congrats! Yall beat The Game!!")
                 gameover = True
+
+    def read_state(str):
+        str_list = str.split(",")
+        return [int(i) for i in str_list]
+
+    def make_state(list):
+        str = ','.join(map(str, list))
+        return str(tup[0]) + "," + str(tup[1])
+
 
 game = Game(2)
 game.run_gameplay()
