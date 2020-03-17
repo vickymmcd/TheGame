@@ -4,10 +4,10 @@ import pygame
 # represent a playing card in The Game
 class PlayingCard:
     def __init__(self, value):
-        self.card = value
+        self.card_val = value
 
     def __str__(self):
-        return str(self.card)
+        return str(self.card_val)
 
 class Deck:
     def __init__(self):
@@ -66,8 +66,8 @@ class Player:
         return self.hand.pop(idx)
 
     def end_turn(self):
-        while len(self.hand) < self.hand_size:
-            self.hand.append(deck.draw_card())
+        while len(self.hand) < self.hand_size and len(self.deck.get_deck_list()) > 0:
+            self.hand.append(self.deck.draw_card())
 
     def print_hand(self):
         hand_str = ""
@@ -91,6 +91,7 @@ class Game:
         print("Ascending: " + str(self.piles[0]) + ", " + str(self.piles[1]))
         print("Descending: " + str(self.piles[2]) + ", " + str(self.piles[3]))
 
+    # returns true if this player's turn ends the game, false otherwise
     def take_turn(self, player):
         keep_playing = "y"
         cards_played = 0
@@ -99,6 +100,9 @@ class Game:
             if not self.possible_moves(player):
                 if cards_played < 2:
                     print("Game over, yall lost.")
+                    print("Game ended with " + str(len(self.deck.get_deck_list())) +
+                        " cards left in the deck.")
+                    return True
                     break
                 print("No more possible moves, ending turn")
                 break
@@ -109,44 +113,49 @@ class Game:
             card_idx = int(input("What card would you like to play? "))
             pile_idx = int(input("What pile would you like to place it on? "))
             if self.check_play_validity(player, pile_idx, card_idx):
+                card = player.play_card(card_idx).card_val
+                self.piles[pile_idx] = card
                 cards_played += 1
+            else:
+                print("INVALID PLAY!")
             if cards_played >= 2:
                 keep_playing = input("Would you like to play another card (y/n)? ")
+        return False
 
     def possible_moves(self, player):
         # check to see if there are any possible moves for that player
         for pile_idx in range(0, 4):
             for card_idx in range(0, len(player.hand)):
-                if check_play_validity(player, pile_idx, card_idx):
+                if self.check_play_validity(player, pile_idx, card_idx):
                     return True
         return False
 
     def check_play_validity(self, player, pile_idx, card_idx):
         pile = self.piles[pile_idx]
-        card = player.peek_card(card_idx).card
+        card1 = player.peek_card(card_idx).card_val
         if pile_idx == 0 or pile_idx == 1:
-            if card > pile or card == pile - 10:
-                player.play_card(card_idx)
-                self.piles[pile_idx] = card
+            if card1 > pile or card1 == pile - 10:
                 return True
             else:
-                print("invalid play")
                 return False
         elif pile_idx == 2 or pile_idx == 3:
-            if card < pile or card == pile + 10:
-                player.play_card(card_idx)
-                self.piles[pile_idx] = card
+            if card1 < pile or card1 == pile + 10:
                 return True
             else:
-                print("invalid play")
                 return False
         return False
 
     def run_gameplay(self):
-        for player in self.players:
-            self.take_turn(player)
-        if len(self.deck.get_deck_list()) == 0:
-            print("Congrats! Yall beat The Game!!")
+        gameover = False
+        while not gameover:
+            for player in self.players:
+                gameover = self.take_turn(player)
+                if gameover:
+                    break
+                player.end_turn()
+            if len(self.deck.get_deck_list()) == 0:
+                print("Congrats! Yall beat The Game!!")
+                gameover = True
 
 game = Game(2)
 game.run_gameplay()
