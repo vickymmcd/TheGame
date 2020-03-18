@@ -1,25 +1,10 @@
 import pygame
-from pygame.locals import*
-
 from game import Game
 from network import Network
-from sys import exit
 
 network = Network()
 game = network.get_game()
 player_number = network.get_player_num()
-
-#starting the pygame     
-pygame.init()
-#creating the screen 400x400
-screen = pygame.display.set_mode((1000, 700), 0, 32)
-#setting the caption 
-pygame.display.set_caption('The Game')
-#setting the Clock
-clock = pygame.time.Clock()
-
-font = pygame.font.SysFont("Arial", 50)
-
 print("Welcome! You are player " + str(player_number))
 while not game.gameover:
     if game.curr_turn == player_number:
@@ -30,7 +15,7 @@ while not game.gameover:
             break
         game.players[player_number].end_turn()
 
-            game.curr_turn = (game.curr_turn + 1) % game.num_players
+        game.curr_turn = (game.curr_turn + 1) % game.num_players
 
         game = network.send((game, player_number))
 

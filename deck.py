@@ -1,4 +1,5 @@
 from random import randint
+import pygame
 
 class Deck:
     def __init__(self):
@@ -33,6 +34,9 @@ class Deck:
 class PlayingCard:
     def __init__(self, value):
         self.card_val = value
+        self.rect = pygame.Rect(32, 32, 16, 16)
+        self.card_img = 'assets/cards/' + str(value) + '.png'
+        
 
     def __str__(self):
         return str(self.card_val)
