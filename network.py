@@ -29,7 +29,9 @@ class Network:
         try:
             # Send the current game object
             self.client.send(pickle.dumps(data))
-            return pickle.loads(self.client.recv(2048))
+            data = pickle.loads(self.client.recv(2048))
+            game, _ = data
+            return game
         except socket.error as e:
             print(e)
 

@@ -9,6 +9,7 @@ class Game:
         self.piles = [1, 1, 100, 100]
         self.players = []
         self.curr_turn = -1
+        self.gameover = False
 
     def deal_cards(self, num_players):
         self.num_players = num_players
@@ -28,9 +29,6 @@ class Game:
             # check whether game is over
             if not self.possible_moves(player):
                 if cards_played < 2:
-                    print("Game over, yall lost.")
-                    print("Game ended with " + str(len(self.deck.get_deck_list())) +
-                        " cards left in the deck.")
                     return True
                     break
                 print("No more possible moves, ending turn")

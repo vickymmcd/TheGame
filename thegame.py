@@ -20,33 +20,35 @@ clock = pygame.time.Clock()
 
 font = pygame.font.SysFont("Arial", 50)
 
-#Main loop:
-while True:
-    for event in pygame.event.get():
-        if event.type == QUIT:
-            #exit command
-            exit()
-    gameover = False
-    while not gameover:
-        print(game.curr_turn)
-        print(game.players)
-        if game.curr_turn == player_number:
-            screen = game.players[player_number-1].display_hand(screen)
-            gameover = game.take_turn(game.players[player_number])
-            if gameover:
-                break
-            game.players[player_number].end_turn()
+print("Welcome! You are player " + str(player_number))
+while not game.gameover:
+    if game.curr_turn == player_number:
+
+        game.gameover = game.take_turn(game.players[player_number])
+        if game.gameover:
+            game = network.send((game, player_number))
+            break
+        game.players[player_number].end_turn()
 
             game.curr_turn = (game.curr_turn + 1) % game.num_players
 
-            game = network.send(game)
+        game = network.send((game, player_number))
 
+    else:
+        if game.curr_turn == -1:
+            print("Waiting for more players to join..")
+            print("If you would like to start indicate this on the server!")
+        else:
+            print("Wait for player " + str(game.curr_turn) + " to take their turn!")
         game = network.receive()
-        if len(game.deck.get_deck_list()) == 0:
-            print("Congrats! Yall beat The Game!!")
-            gameover = True
-        pygame.display.update()
-        #Limiting the fps to 10
-        time_passed = clock.tick(10)
 
-print("GG")
+    if len(game.deck.get_deck_list()) == 0:
+        game.gameover = True
+        game = network.send((game, player_number))
+
+print("Game ended with " + str(len(game.deck.get_deck_list())) + " cards left in the deck")
+
+if len(game.deck.get_deck_list()) > 0:
+    print("Game over, yall lost.")
+elif len(game.deck.get_deck_list()) == 0:
+    print("Congrats! Yall beat The Game!!")
