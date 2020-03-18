@@ -41,12 +41,16 @@ def threaded_client(conn, currentPlayer):
                 print("Received: ", data)
                 print("Sending : ", reply)
 
-            conn.sendall(pickle.dumps(reply))
+            broadcast(reply)
         except:
             break
 
     print("Lost connection")
     conn.close()
+
+def broadcast(game_state):
+    for conn in client_conns:
+        conn.sendall(pickle.dumps(game_state))
 
 
 num_players = 0
