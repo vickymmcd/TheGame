@@ -34,3 +34,7 @@ class Player:
         hand_str = hand_str + str(self.hand[i+1])
         print(hand_str)
         return hand_str
+
+
+class InvalidNumberOfPlayersException(Exception):
+    pass

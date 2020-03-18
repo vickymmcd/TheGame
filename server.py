@@ -19,19 +19,18 @@ except socket.error as e:
 s.listen(5)
 print("Waiting for a connection, Server Started")
 
-s.listen(5)
-print("Waiting for a connection, Server Started")
-
 # Initiate the game object
-game = Game(5)
+game = Game()
 
-def threaded_client(conn):
-    conn.send(pickle.dumps(game))
+def threaded_client(conn, currentPlayer):
+    global game
+    conn.send(pickle.dumps((game, currentPlayer)))
     reply = ""
     while True:
         try:
             # Get the new game data
             data = pickle.loads(conn.recv(2048))
+            game, _ = data
 
             if not data:
                 print("Disconnected")
@@ -50,10 +49,21 @@ def threaded_client(conn):
     conn.close()
 
 
-currentPlayer = 0
+num_players = 0
+client_conns = []
 while True:
     conn, addr = s.accept()
+    client_conns.append(conn)
     print("Connected to:", addr)
 
-    start_new_thread(threaded_client, (conn, currentPlayer))
-    currentPlayer += 1
+    start_new_thread(threaded_client, (conn, num_players))
+    num_players += 1
+    keep_waiting = input("Wait for more players? (y/n) ")
+    if keep_waiting == "n":
+        break
+
+game.deal_cards(num_players)
+for conn in client_conns:
+    conn.sendall(pickle.dumps((game, -1)))
+while True:
+    pass

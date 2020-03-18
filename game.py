@@ -4,14 +4,17 @@ from deck import Deck
 
 class Game:
     # piles 1 and 2 ascending, piles 3 & 4 descending
-    def __init__(self, num_players):
-        self.network = Network()
-        self.num_players = num_players
+    def __init__(self):
         self.deck = Deck()
         self.piles = [1, 1, 100, 100]
         self.players = []
+        self.curr_turn = -1
+
+    def deal_cards(self, num_players):
+        self.num_players = num_players
         for i in range(0, self.num_players):
             self.players.append(Player(self.num_players, self.deck, i))
+        self.curr_turn = 0
 
     def print_piles(self):
         print("Ascending: " + str(self.piles[0]) + ", " + str(self.piles[1]))
@@ -47,8 +50,6 @@ class Game:
             if cards_played >= 2:
                 keep_playing = input("Would you like to play another card (y/n)? ")
 
-            # If card is moved, update the server with the new game state
-            n.send(self)
         return False
 
     def possible_moves(self, player):
@@ -76,12 +77,12 @@ class Game:
 
     def run_gameplay(self):
         gameover = False
-        # Get the state of the game from the server
-        game_state = self.network.getState()
+        # # Get the state of the game from the server
+        # game_state = self.network.getState()
 
         while not gameover:
-            for player in game_state.players:
-                gameover = game_state.take_turn(player)
+            for player in self.players:
+                gameover = self.take_turn(player)
                 if gameover:
                     break
                 player.end_turn()
