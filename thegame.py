@@ -157,5 +157,4 @@ class Game:
                 print("Congrats! Yall beat The Game!!")
                 gameover = True
 
-game = Game(2)
-game.run_gameplay()
+

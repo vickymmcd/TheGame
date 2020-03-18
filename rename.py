@@ -10,7 +10,7 @@ def main():
     i = 1
       
     for filename in os.listdir("assets/cards"): 
-        dst = str(i) + ".jpg"
+        dst = str(i) + ".png"
         src ='assets/cards/'+ filename 
         dst ='assets/cards/'+ dst 
           
