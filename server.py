@@ -6,9 +6,11 @@ from player import Player
 import pickle
 
 # If this doens't work: Use ipconfig, then paste your IPV4 address here
-server = socket.gethostbyname(socket.gethostname())
+#server = socket.gethostbyname(socket.gethostname())
+server = '0.0.0.0' if 'PORT' in os.environ else '127.0.0.1'
 
-port = 5555
+#port = 5555
+port = int(os.environ.get('PORT', 5000)))
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 try:
