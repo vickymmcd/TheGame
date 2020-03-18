@@ -1,3 +1,5 @@
+import pygame
+
 class Player:
     def __init__(self, num_players, deck, player_id):
         self.num_players = num_players
@@ -26,6 +28,18 @@ class Player:
     def end_turn(self):
         while len(self.hand) < self.hand_size and len(self.deck.get_deck_list()) > 0:
             self.hand.append(self.deck.draw_card())
+
+    def display_hand(self, screen):
+        # setting position of cards
+        x = 30
+        y = 304
+        for i in range(0, len(self.hand)-1):
+            sprite_card = 'assets/cards/' + str(i+1) + '.png'
+            card = pygame.image.load(sprite_card).convert_alpha()
+            #displaying the first card
+            screen.blit(card, (x, y))
+            x += 220
+        return screen
 
     def print_hand(self):
         hand_str = ""

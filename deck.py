@@ -4,7 +4,7 @@ class Deck:
     def __init__(self):
         # create the deck of cards from 2-99
         self.deck = []
-        for i in range(2, 100):
+        for i in range(2, 48):
             self.deck.append(PlayingCard(i))
 
     def get_deck_list(self):

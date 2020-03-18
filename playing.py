@@ -14,10 +14,8 @@ pygame.display.set_caption('The Game')
 #setting the Clock
 clock = pygame.time.Clock()
 
-drawPile = range(1,47)
-print(drawPile)
-
-initcards = random.sample(drawPile, 9)
+game = Game(2)
+game.run_gameplay()
 
 
 #generating initial cards, concatening and loading the images
