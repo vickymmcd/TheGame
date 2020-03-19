@@ -15,8 +15,8 @@ class App:
         self._image_surf = None
         self.clock = None
         self.font = None
-        self.windowWidth = 1000
-        self.windowHeight = 700
+        self.windowWidth = 1500
+        self.windowHeight = 875
         self.x = 10
         self.y = 10
         self.network = None
@@ -46,22 +46,28 @@ class App:
         if event.type == MOUSEBUTTONDOWN:
             # Set the x, y postions of the mouse click
             x, y = event.pos
+            print(x,y)
+            '''
             for card in game.player[self.player_number-1].hand:
                 if card.get_rect().collidepoint(x, y):
-                    print("collide!")
+                    print("collide!")'''
     
     def on_loop(self):
         pass
     
     def on_render(self):
-        x0 = 30
-        y0 = 304
+        x0 = 150
+        y0 = 600
         #self._display_surf.blit(self._image_surf,(self.x,self.y))
         for card in self.game.players[self.player_number-1].hand:
-            print(card.card_img)
-            #sprite_img = pygame.image.load(card.card_img).convert_alpha()
-           # self._display_surf.blit(sprite_img, (x0, y0))
-            x0 += 220
+            #print(card.card_img)
+            print("wooo")
+            card_img = 'assets/cards/Asset ' + str(card.card_val) + '.png'
+            sprite_img = pygame.image.load(card_img).convert_alpha()
+            sprite_img = pygame.transform.scale(sprite_img, (150, 220))
+            self._display_surf.blit(sprite_img, (x0, y0))
+            #card.rect = Rect(x0, y0, 150, 220)
+            x0 += 175
         pygame.display.flip()
  
     def on_cleanup(self):
@@ -79,6 +85,7 @@ class App:
         print("Welcome! You are player " + str(self.player_number))
         while( self._running ):
             for event in pygame.event.get():
+                print("event wooo")
                 if self.game.curr_turn == self.player_number:
                     self.game.gameover = self.on_event(event)
                     self.game.gameover = self.game.take_turn(self.game.players[self.player_number])

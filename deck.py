@@ -4,7 +4,7 @@ class Deck:
     def __init__(self):
         # create the deck of cards from 2-99
         self.deck = []
-        for i in range(2, 48):
+        for i in range(2, 101):
             self.deck.append(PlayingCard(i))
 
     def get_deck_list(self):
@@ -33,7 +33,8 @@ class Deck:
 class PlayingCard:
     def __init__(self, value):
         self.card_val = value
-        self.card_img = 'woooo' #'assets/cards/' + str(self.card_val) + '.png'
+        #self.rect = None
+        #self.card_img = 'assets/cards/Asset ' + str(value) + '.png'
 
     def __str__(self):
         return str(self.card_val)
