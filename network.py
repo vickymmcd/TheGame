@@ -37,7 +37,7 @@ class Network:
 
     def receive(self):
         try:
-            game, _ = pickle.loads(self.client.recv(2048))
+            game, _ = pickle.loads(self.client.recv(4000))
             return game
         except socket.error as e:
             print(e)

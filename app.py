@@ -3,6 +3,7 @@ from pygame.locals import *
 
 from game import Game
 from network import Network
+from endTurnButton import EndTurnButton
 from sys import exit
  
 class App:
@@ -22,6 +23,7 @@ class App:
         self.network = None
         self.game = None
         self.player_number = None
+        self.endTurnButton = None
         
  
     def on_init(self):
@@ -38,6 +40,7 @@ class App:
         self.network = Network()
         self.game = self.network.get_game()
         self.player_number = self.network.get_player_num()
+        self.endTurnButton = EndTurnButton(self._display_surf)
         return True
  
     def on_event(self, event):
@@ -46,11 +49,10 @@ class App:
         if event.type == MOUSEBUTTONDOWN:
             # Set the x, y postions of the mouse click
             x, y = event.pos
-            print(x,y)
-            '''
-            for card in game.player[self.player_number-1].hand:
-                if card.get_rect().collidepoint(x, y):
-                    print("collide!")'''
+            
+            for card in self.game.players[self.player_number-1].hand:
+                if card.rect.collidepoint(x, y):
+                    print("collide!")
     
     def on_loop(self):
         pass
@@ -58,16 +60,15 @@ class App:
     def on_render(self):
         x0 = 150
         y0 = 600
-        #self._display_surf.blit(self._image_surf,(self.x,self.y))
+
         for card in self.game.players[self.player_number-1].hand:
-            #print(card.card_img)
-            print("wooo")
             card_img = 'assets/cards/Asset ' + str(card.card_val) + '.png'
             sprite_img = pygame.image.load(card_img).convert_alpha()
             sprite_img = pygame.transform.scale(sprite_img, (150, 220))
             self._display_surf.blit(sprite_img, (x0, y0))
-            #card.rect = Rect(x0, y0, 150, 220)
+            card.create_rect(x0, y0, 150, 220)
             x0 += 175
+
         pygame.display.flip()
  
     def on_cleanup(self):
@@ -85,9 +86,9 @@ class App:
         print("Welcome! You are player " + str(self.player_number))
         while( self._running ):
             for event in pygame.event.get():
-                print("event wooo")
                 if self.game.curr_turn == self.player_number:
                     self.game.gameover = self.on_event(event)
+                    '''
                     self.game.gameover = self.game.take_turn(self.game.players[self.player_number])
                     if self.game.gameover:
                         self.game = self.network.send((self.game, self.player_number))
@@ -97,6 +98,7 @@ class App:
                     self.game.curr_turn = (self.game.curr_turn + 1) % self.game.num_players
 
                     self.game = self.network.send((self.game, self.player_number))
+                    '''
 
                 else:
                     if self.game.curr_turn == -1:
@@ -110,6 +112,7 @@ class App:
                     self.game.gameover = True
                     self.game = self.network.send((self.game, self.player_number))
                     self._running = False
+                
             self.on_loop()
             self.on_render()
         self.on_cleanup()

@@ -14,6 +14,7 @@ class Player:
             self.hand = deck.draw_hand(8)
         else:
             raise InvalidNumberOfPlayersException
+        self.hand.sort(key=lambda x: x.card_val)
 
     # peeks card in hand at index idx before playing it need to see if valid!
     def peek_card(self, idx):
@@ -26,6 +27,7 @@ class Player:
     def end_turn(self):
         while len(self.hand) < self.hand_size and len(self.deck.get_deck_list()) > 0:
             self.hand.append(self.deck.draw_card())
+        self.hand.sort(key=lambda x: x.card_val)
 
     def print_hand(self):
         hand_str = ""

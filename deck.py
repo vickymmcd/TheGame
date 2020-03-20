@@ -1,10 +1,13 @@
 from random import randint
+from playingcard import PlayingCard
 
 class Deck:
     def __init__(self):
         # create the deck of cards from 2-99
         self.deck = []
-        for i in range(2, 101):
+
+    def on_init(self):
+        for i in range(2, 100):
             self.deck.append(PlayingCard(i))
 
     def get_deck_list(self):
@@ -29,12 +32,3 @@ class Deck:
         deck_str = deck_str + str(self.deck[i+1])
         return deck_str
 
-# represent a playing card in The Game
-class PlayingCard:
-    def __init__(self, value):
-        self.card_val = value
-        #self.rect = None
-        #self.card_img = 'assets/cards/Asset ' + str(value) + '.png'
-
-    def __str__(self):
-        return str(self.card_val)

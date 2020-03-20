@@ -24,6 +24,26 @@ game = Game()
 
 def threaded_client(conn, currentPlayer):
     global game
+    '''
+    packet = pickle.dumps((game, currentPlayer))
+    length = struct.pack('!I', len(packet))
+    packet = length + packet
+    conn.send(packet)
+    reply = ""
+    while True:
+        try:
+            # Get the new game data
+            buf = b''
+            while len(buf) < 4:
+                buf += conn.recv(4 - len(buf))
+
+            length = struct.unpack('!I', buf)[0]
+            message = b''
+            while len(message) < length:
+                message += conn.recv()
+            data = pickle.loads(message)
+            game, _ = data
+    '''
     conn.send(pickle.dumps((game, currentPlayer)))
     reply = ""
     while True:

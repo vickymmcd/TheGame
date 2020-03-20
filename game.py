@@ -12,6 +12,7 @@ class Game:
         self.gameover = False
 
     def deal_cards(self, num_players):
+        self.deck.on_init()
         self.num_players = num_players
         for i in range(0, self.num_players):
             self.players.append(Player(self.num_players, self.deck, i))
