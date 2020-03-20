@@ -25,6 +25,9 @@ class Deck:
             hand.append(self.draw_card())
         return hand
 
+    def get_deck_size(self):
+        return len(self.deck)
+
     def __str__(self):
         deck_str = ""
         for i in range(0, len(self.deck)-1):
