@@ -5,10 +5,10 @@ from game import Game
 from network import Network
 from buttons import EndTurnButton, PlayCardButton
 from sys import exit
- 
+
 class App:
 
-    
+
 
     def __init__(self):
         self._running = True
@@ -28,13 +28,13 @@ class App:
         self.selected_card_id = None
         self.selected_pile_id = None
         self.moves_made = 0
-        
- 
+
+
     def on_init(self):
         pygame.init()
         self._display_surf = pygame.display.set_mode((self.windowWidth,self.windowHeight), pygame.HWSURFACE)
         self._running = True
-        #setting the caption 
+        #setting the caption
         pygame.display.set_caption('The Game')
         #setting the Clock
         self.clock = pygame.time.Clock()
@@ -49,7 +49,7 @@ class App:
         return True
 
     def card_select(self, x, y):
-        for idx, card in enumerate(self.game.players[self.player_number-1].hand):
+        for idx, card in enumerate(self.game.players[self.player_number].hand):
             if card.rect.collidepoint(x, y):
                 if self.selected_card_id == idx:
                     self.selected_card_id = None
@@ -59,7 +59,7 @@ class App:
                 print("Selected card id: " + str(self.selected_card_id))
                 return False
         return False
-    
+
     def pile_select(self, x,y):
         for idy, pile in enumerate(self.game.piles):
             if pile.rect.collidepoint(x,y):
@@ -76,6 +76,7 @@ class App:
             self.game = self.network.send((self.game, self.player_number))
             return True
         self.game.players[self.player_number].end_turn()
+        self.on_render()
         self.game.curr_turn = (self.game.curr_turn + 1) % self.game.num_players
         self.game = self.network.send((self.game, self.player_number))
         self.moves_made = 0
@@ -90,7 +91,7 @@ class App:
 
         if self.playCardButton.rect.collidepoint(x,y):
             if self.selected_card_id != None and self.selected_pile_id != None:
-                play_sucess = self.game.take_turn(self.game.players[self.player_number-1], self.selected_pile_id, self.selected_card_id)
+                play_sucess = self.game.take_turn(self.game.players[self.player_number], self.selected_pile_id, self.selected_card_id)
                 if play_sucess:
                     self.moves_made +=1
                     self._display_surf.fill((0,0,0))
@@ -102,7 +103,7 @@ class App:
         if event.type == QUIT:
             self._running = False
         if event.type == MOUSEBUTTONDOWN:
-            if not self.game.possible_moves(self.game.players[self.player_number-1]):
+            if not self.game.possible_moves(self.game.players[self.player_number]):
                 if self.game.deck.get_deck_size() > 0:
                     if self.moves_made < 2:
                         self.game.gameover = True
@@ -110,7 +111,7 @@ class App:
                     self.game.gameover = True
                 print("No more possible moves, ending turn")
                 self.end_turn()
-                
+
             # Set the x, y postions of the mouse click
             x, y = event.pos
             return_val = False
@@ -122,7 +123,7 @@ class App:
                 return_val = self.card_select(x,y)
             self.on_render()
             return return_val
-            
+
 
     def on_loop(self):
         pass
@@ -131,7 +132,7 @@ class App:
         x0 = 150
         y0 = 600
 
-        for card in self.game.players[self.player_number-1].hand:
+        for card in self.game.players[self.player_number].hand:
             card_img = 'assets/cards/Asset ' + str(card.card_val) + '.png'
             sprite_img = pygame.image.load(card_img).convert_alpha()
             sprite_img = pygame.transform.scale(sprite_img, (150, 220))
@@ -158,16 +159,16 @@ class App:
             elif rotating_id == 2:
                 x0 -= 175
                 rotating_id += 1
-    
+
     def on_render(self):
         self.endTurnButton = EndTurnButton(self._display_surf)
         self.playCardButton = PlayCardButton(self._display_surf)
         self.display_hand()
-        
+
         self.display_piles()
         #self._display_surf.fill((0,0,0))
         pygame.display.update()
- 
+
     def on_cleanup(self):
         print("Game ended with " + str(len(self.game.deck.get_deck_list())) + " cards left in the deck")
 
@@ -176,7 +177,7 @@ class App:
         elif len(self.game.deck.get_deck_list()) == 0:
             print("Congrats! Yall beat The Game!!")
         pygame.quit()
- 
+
     def on_execute(self):
         if self.on_init() == False:
             self._running = False
@@ -184,7 +185,7 @@ class App:
         while( self._running ):
             for event in pygame.event.get():
                 if self.game.curr_turn == self.player_number:
-                    #self.game.gameover = 
+                    #self.game.gameover =
                     self.on_event(event)
                     '''
                     self.game.gameover = self.game.take_turn(self.game.players[self.player_number])
@@ -205,18 +206,18 @@ class App:
                     else:
                         print("Wait for player " + str(self.game.curr_turn) + " to take their turn!")
                         self.on_render()
-                        self.game.players[self.player_number-1].print_hand()
+                        self.game.players[self.player_number].print_hand()
                     self.game = self.network.receive()
                 #self.game.players[self.player_number-1].print_hand()
                 if len(self.game.deck.get_deck_list()) == 0:
                     self.game.gameover = True
                     self.game = self.network.send((self.game, self.player_number))
                     self._running = False
-                
+
             self.on_render()
         self.on_cleanup()
-        
- 
+
+
 if __name__ == "__main__" :
     theApp = App()
     theApp.on_execute()
