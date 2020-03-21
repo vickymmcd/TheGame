@@ -28,6 +28,10 @@ class App:
         self.selected_card_id = None
         self.selected_pile_id = None
         self.moves_made = 0
+        self.card_rect = None
+        self.pile_rect = None
+        self.notification_rect = None
+        self.num_cards_rect = None
 
 
     def on_init(self):
@@ -49,16 +53,40 @@ class App:
         return True
 
     def card_select(self, x, y):
-        for idx, card in enumerate(self.game.players[self.player_number].hand):
+        player_deck = self.game.players[self.player_number].hand
+        for idx, card in enumerate(player_deck):
             if card.rect.collidepoint(x, y):
                 if self.selected_card_id == idx:
                     self.selected_card_id = None
                 else:
                     self.selected_card_id = idx
 
-                print("Selected card id: " + str(self.selected_card_id))
-                return False
+                if(self.selected_card_id != None):
+                    display_info = f"Selected card: {player_deck[self.selected_card_id]}"
+                    print(display_info)
+                    card_rect = self.display_text(display_info, 10, self.windowHeight//3 - 25, self.card_rect)
+                    self.card_rect = card_rect
+                    return False
         return False
+
+    def display_text(self, display_info, width, height, prev_rect):
+        # Gives on-screen feedback to the user
+        screen = pygame.display.get_surface()
+        if(prev_rect != None):
+            screen.fill(pygame.Color("black"), prev_rect)
+        if(self.notification_rect != None):
+            screen.fill(pygame.Color("black"), self.notification_rect)
+
+        green = (0, 255, 0)
+        blue = (0, 0, 128)
+        text = self.font.render(display_info, True, pygame.Color("white"))
+        textRect = text.get_rect()
+
+        # set the center of the rectangular object.
+        textRect.topleft = (width, height)
+        self.textRect = textRect
+        self._display_surf.blit(text, textRect)
+        return textRect
 
     def pile_select(self, x,y):
         for idy, pile in enumerate(self.game.piles):
@@ -67,8 +95,13 @@ class App:
                     self.selected_pile_id = None
                 else:
                     self.selected_pile_id = idy
-                print("Selected pile id: " + str(self.selected_pile_id))
-                return False
+
+                if(self.selected_pile_id != None):
+                    display_info = f"Selected pile: {self.game.piles[self.selected_pile_id]}"
+                    print(display_info)
+                    pile_rect = self.display_text(display_info, 10, self.windowHeight//3 + 25, self.pile_rect)
+                    self.pile_rect = pile_rect
+                    return False
         return False
 
     def end_turn(self):
@@ -80,14 +113,22 @@ class App:
         self.game.curr_turn = (self.game.curr_turn + 1) % self.game.num_players
         self.game = self.network.send((self.game, self.player_number))
         self.moves_made = 0
+
+        cards_in_deck = len(self.game.deck.get_deck_list())
+        display_info = f"Cards left in deck: {cards_in_deck}"
+        num_cards_rect = self.display_text(display_info, 2*self.windowWidth//3, self.windowHeight//3, self.num_cards_rect)
+        self.num_cards_rect = num_cards_rect
         return False
 
     def button_select(self,x,y):
+        display_info = ""
+
         if self.endTurnButton.rect.collidepoint(x, y):
             if (self.game.deck.get_deck_size() == 0 and self.moves_made >= 1) or self.moves_made >= 2:
                 return self.end_turn()
             else:
-                print("You need to play more cards!")
+                display_info = "You need to play more cards!"
+                print(display_info)
 
         if self.playCardButton.rect.collidepoint(x,y):
             if self.selected_card_id != None and self.selected_pile_id != None:
@@ -96,7 +137,12 @@ class App:
                     self.moves_made +=1
                     self._display_surf.fill((0,0,0))
             else:
-                print("select a card and a pile")
+                display_info = "Select a card and a pile"
+                print(display_info)
+
+        if(display_info != ""):
+            notification_rect = self.display_text(display_info, self.windowWidth//3 + 25, 10, self.notification_rect)
+            self.notification_rect = notification_rect
         return False
 
     def on_event(self, event):
@@ -164,7 +210,6 @@ class App:
         self.endTurnButton = EndTurnButton(self._display_surf)
         self.playCardButton = PlayCardButton(self._display_surf)
         self.display_hand()
-
         self.display_piles()
         #self._display_surf.fill((0,0,0))
         pygame.display.update()
@@ -181,7 +226,12 @@ class App:
     def on_execute(self):
         if self.on_init() == False:
             self._running = False
-        print("Welcome! You are player " + str(self.player_number))
+
+        display_info = f"Welcome! You are player {self.player_number}"
+        notification_rect = self.display_text(display_info, self.windowWidth//3 + 25, 10, self.notification_rect)
+        self.notification_rect = notification_rect
+        print(display_info)
+
         while( self._running ):
             for event in pygame.event.get():
                 if self.game.curr_turn == self.player_number:
@@ -198,16 +248,20 @@ class App:
 
                     self.game = self.network.send((self.game, self.player_number))
                     '''
-
                 else:
                     if self.game.curr_turn == -1:
                         print("Waiting for more players to join..")
                         print("If you would like to start indicate this on the server!")
                     else:
-                        print("Wait for player " + str(self.game.curr_turn) + " to take their turn!")
+                        display_info = f"Waiting for player {self.game.curr_turn} to take their turn!"
+                        notification_rect = self.display_text(display_info, self.windowWidth//3 + 25, 10, self.notification_rect)
+                        self.notification_rect = notification_rect
+
+                        print(display_info)
                         self.on_render()
                         self.game.players[self.player_number].print_hand()
                     self.game = self.network.receive()
+
                 #self.game.players[self.player_number-1].print_hand()
                 if len(self.game.deck.get_deck_list()) == 0:
                     self.game.gameover = True

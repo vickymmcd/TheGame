@@ -4,6 +4,7 @@ import sys
 from game import Game
 from player import Player
 import pickle
+import os
 
 # If this doens't work: Use ipconfig, then paste your IPV4 address here
 server = socket.gethostbyname(socket.gethostname())
@@ -65,8 +66,9 @@ def threaded_client(conn, currentPlayer):
         except:
             break
 
-    print("Lost connection")
     conn.close()
+    print(f"Player {currentPlayer} has lost connection. Restart server.")
+    os._exit(0)
 
 def broadcast(game_state):
     for conn in client_conns:
