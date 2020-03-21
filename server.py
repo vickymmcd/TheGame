@@ -49,7 +49,7 @@ def threaded_client(conn, currentPlayer):
     while True:
         try:
             # Get the new game data
-            data = pickle.loads(conn.recv(2048))
+            data = pickle.loads(conn.recv(4000))
             game, _ = data
 
             if not data:

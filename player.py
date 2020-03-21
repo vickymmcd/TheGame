@@ -26,6 +26,7 @@ class Player:
 
     def end_turn(self):
         while len(self.hand) < self.hand_size and len(self.deck.get_deck_list()) > 0:
+            print("drawing new card")
             self.hand.append(self.deck.draw_card())
         self.hand.sort(key=lambda x: x.card_val)
 

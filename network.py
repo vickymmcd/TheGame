@@ -20,7 +20,7 @@ class Network:
         try:
             print("hiya friend")
             self.client.connect(self.addr)
-            game, player_num = pickle.loads(self.client.recv(2048))
+            game, player_num = pickle.loads(self.client.recv(4000))
             return game, player_num
         except:
             pass
@@ -29,7 +29,7 @@ class Network:
         try:
             # Send the current game object
             self.client.send(pickle.dumps(data))
-            data = pickle.loads(self.client.recv(2048))
+            data = pickle.loads(self.client.recv(4000))
             game, _ = data
             return game
         except socket.error as e:

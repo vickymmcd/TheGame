@@ -57,7 +57,8 @@ class App:
                     self.selected_card_id = idx
 
                 print("Selected card id: " + str(self.selected_card_id))
-                return
+                return False
+        return False
     
     def pile_select(self, x,y):
         for idy, pile in enumerate(self.game.piles):
@@ -67,52 +68,60 @@ class App:
                 else:
                     self.selected_pile_id = idy
                 print("Selected pile id: " + str(self.selected_pile_id))
-                return
+                return False
+        return False
 
     def end_turn(self):
         if self.game.gameover:
             self.game = self.network.send((self.game, self.player_number))
-            break
+            return True
         self.game.players[self.player_number].end_turn()
-
         self.game.curr_turn = (self.game.curr_turn + 1) % self.game.num_players
-
         self.game = self.network.send((self.game, self.player_number))
         self.moves_made = 0
+        return False
 
     def button_select(self,x,y):
         if self.endTurnButton.rect.collidepoint(x, y):
             if (self.game.deck.get_deck_size() == 0 and self.moves_made >= 1) or self.moves_made >= 2:
-                self.end_turn()
+                return self.end_turn()
             else:
                 print("You need to play more cards!")
 
-        if self.playCardButton.rect.collidpoint(x,y):
+        if self.playCardButton.rect.collidepoint(x,y):
             if self.selected_card_id != None and self.selected_pile_id != None:
                 play_sucess = self.game.take_turn(self.game.players[self.player_number-1], self.selected_pile_id, self.selected_card_id)
                 if play_sucess:
                     self.moves_made +=1
+                    self._display_surf.fill((0,0,0))
             else:
                 print("select a card and a pile")
+        return False
 
     def on_event(self, event):
         if event.type == QUIT:
             self._running = False
         if event.type == MOUSEBUTTONDOWN:
             if not self.game.possible_moves(self.game.players[self.player_number-1]):
-                if self.moves_made < 2:
-                    self.game.gameover == True
+                if self.game.deck.get_deck_size() > 0:
+                    if self.moves_made < 2:
+                        self.game.gameover = True
+                elif self.moves_made == 0:
+                    self.game.gameover = True
                 print("No more possible moves, ending turn")
                 self.end_turn()
                 
             # Set the x, y postions of the mouse click
             x, y = event.pos
+            return_val = False
             if y < 110:
-                self.button_select(x,y)
+                return_val = self.button_select(x,y)
             elif y >= 110 and y <=550:
-                self.pile_select(x,y)
+                return_val = self.pile_select(x,y)
             else:
-                self.card_select(x,y)
+                return_val = self.card_select(x,y)
+            self.on_render()
+            return return_val
             
 
     def on_loop(self):
@@ -151,11 +160,13 @@ class App:
                 rotating_id += 1
     
     def on_render(self):
-       
+        self.endTurnButton = EndTurnButton(self._display_surf)
+        self.playCardButton = PlayCardButton(self._display_surf)
         self.display_hand()
         
         self.display_piles()
-        pygame.display.flip()
+        #self._display_surf.fill((0,0,0))
+        pygame.display.update()
  
     def on_cleanup(self):
         print("Game ended with " + str(len(self.game.deck.get_deck_list())) + " cards left in the deck")
@@ -173,7 +184,8 @@ class App:
         while( self._running ):
             for event in pygame.event.get():
                 if self.game.curr_turn == self.player_number:
-                    self.game.gameover = self.on_event(event)
+                    #self.game.gameover = 
+                    self.on_event(event)
                     '''
                     self.game.gameover = self.game.take_turn(self.game.players[self.player_number])
                     if self.game.gameover:
@@ -192,14 +204,15 @@ class App:
                         print("If you would like to start indicate this on the server!")
                     else:
                         print("Wait for player " + str(self.game.curr_turn) + " to take their turn!")
+                        self.on_render()
+                        self.game.players[self.player_number-1].print_hand()
                     self.game = self.network.receive()
-
+                #self.game.players[self.player_number-1].print_hand()
                 if len(self.game.deck.get_deck_list()) == 0:
                     self.game.gameover = True
                     self.game = self.network.send((self.game, self.player_number))
                     self._running = False
                 
-            self.on_loop()
             self.on_render()
         self.on_cleanup()
         
