@@ -4,7 +4,7 @@ import pickle
 class Network:
     def __init__(self):
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server = socket.gethostbyname(socket.gethostname())
+        self.server = str(input("What IP is the server running on?"))
         self.port = 5555
         self.addr = (self.server, self.port)
         self.game, self.player_num = self.connect()
@@ -20,7 +20,7 @@ class Network:
         try:
             print("hiya friend")
             self.client.connect(self.addr)
-            game, player_num = pickle.loads(self.client.recv(4000))
+            game, player_num = pickle.loads(self.client.recv(15000))
             return game, player_num
         except:
             pass
@@ -29,7 +29,7 @@ class Network:
         try:
             # Send the current game object
             self.client.send(pickle.dumps(data))
-            data = pickle.loads(self.client.recv(4000))
+            data = pickle.loads(self.client.recv(15000))
             game, _ = data
             return game
         except socket.error as e:
@@ -37,7 +37,7 @@ class Network:
 
     def receive(self):
         try:
-            game, _ = pickle.loads(self.client.recv(4000))
+            game, _ = pickle.loads(self.client.recv(15000))
             return game
         except socket.error as e:
             print(e)
