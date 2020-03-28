@@ -31,7 +31,7 @@ class Game:
         cards_played = 0
         while keep_playing == "y":
             # check whether game is over
-            
+
             print("PLAYER HAND")
             player.print_hand()
             print("CURRENT PILES")
@@ -50,7 +50,7 @@ class Game:
             if cards_played >= 2:
                 keep_playing = input("Would you like to play another card (y/n)? ")
             '''
-        
+
 
     def possible_moves(self, player):
         # check to see if there are any possible moves for that player
@@ -74,6 +74,12 @@ class Game:
             else:
                 return False
         return False
+
+    def get_num_cards_in_hands(self):
+        total = 0
+        for player in self.players:
+            total += len(player.hand)
+        return total
 
     def run_gameplay(self):
         gameover = False

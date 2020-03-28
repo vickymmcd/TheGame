@@ -8,6 +8,7 @@ import os
 
 # If this doens't work: Use ipconfig, then paste your IPV4 address here
 server = socket.gethostbyname(socket.gethostname())
+print(server)
 
 port = 5555
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

@@ -216,10 +216,11 @@ class App:
 
     def on_cleanup(self):
         print("Game ended with " + str(len(self.game.deck.get_deck_list())) + " cards left in the deck")
+        print("and with " + str(self.game.get_num_cards_in_hands()) + " cards left in players' hands")
 
         if len(self.game.deck.get_deck_list()) > 0:
             print("Game over, yall lost.")
-        elif len(self.game.deck.get_deck_list()) == 0:
+        elif len(self.game.deck.get_deck_list()) == 0 and self.game.get_num_cards_in_hands() == 0:
             print("Congrats! Yall beat The Game!!")
         pygame.quit()
 
