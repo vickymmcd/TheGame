@@ -1,7 +1,6 @@
 from player import Player
 from network import Network
 from deck import Deck
-from playingcard import PlayingCard
 
 class Game:
     # piles 1 and 2 ascending, piles 3 & 4 descending
@@ -12,17 +11,24 @@ class Game:
         self.curr_turn = -1
         self.gameover = False
 
+    def to_json(self):
+        return {"deck": self.deck.to_json(),
+                "piles": self.piles,
+                "players": self.players,
+                "curr_turn": self.curr_turn,
+                "gameover": self.gameover}
+
     def deal_cards(self, num_players):
-        self.deck.on_init()
-        self.piles = [PlayingCard(1), PlayingCard(1), PlayingCard(100), PlayingCard(100)]
+        #self.deck.on_init()
+        self.piles = [1, 1, 100, 100]
         self.num_players = num_players
         for i in range(0, self.num_players):
             self.players.append(Player(self.num_players, self.deck, i))
         self.curr_turn = 0
 
     def print_piles(self):
-        print("Ascending: " + str(self.piles[0].card_val) + ", " + str(self.piles[1].card_val))
-        print("Descending: " + str(self.piles[2].card_val) + ", " + str(self.piles[3].card_val))
+        print("Ascending: " + str(self.piles[0]) + ", " + str(self.piles[1]))
+        print("Descending: " + str(self.piles[2]) + ", " + str(self.piles[3]))
 
     # returns true if this player's turn ends the game, false otherwise
     def take_turn(self, player, pile_idx, card_idx):
@@ -62,14 +68,14 @@ class Game:
 
     def check_play_validity(self, player, pile_idx, card_idx):
         pile = self.piles[pile_idx]
-        card1 = player.peek_card(card_idx).card_val
+        card1 = player.peek_card(card_idx)
         if pile_idx == 0 or pile_idx == 1:
-            if card1 > pile.card_val or card1 == pile.card_val - 10:
+            if card1 > pile or card1 == pile - 10:
                 return True
             else:
                 return False
         elif pile_idx == 2 or pile_idx == 3:
-            if card1 < pile.card_val or card1 == pile.card_val + 10:
+            if card1 < pile or card1 == pile + 10:
                 return True
             else:
                 return False

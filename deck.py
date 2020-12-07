@@ -1,14 +1,17 @@
 from random import randint
-from playingcard import PlayingCard
 
 class Deck:
-    def __init__(self):
+    def __init__(self, deck=None):
         # create the deck of cards from 2-99
-        self.deck = []
+        if deck is None:
+            self.deck = []
+            self.on_init()
+        else:
+            self.deck = deck
 
     def on_init(self):
         for i in range(2, 100):
-            self.deck.append(PlayingCard(i))
+            self.deck.append(i)
 
     def get_deck_list(self):
         return self.deck
@@ -35,3 +38,5 @@ class Deck:
         deck_str = deck_str + str(self.deck[i+1])
         return deck_str
 
+    def to_json(self):
+        return self.deck

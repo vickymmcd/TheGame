@@ -1,43 +1,26 @@
-import socket
-import pickle
-
 class Network:
-    def __init__(self):
-        self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server = str(input("What IP is the server running on? "))
-        self.port = 5555
-        self.addr = (self.server, self.port)
-        self.game, self.player_num = self.connect()
+    def __init__(self, game, player_num, user_room_code, socketio):
+        self.game = game
+        self.player_num = player_num
+        self.user_room_code = user_room_code
+        self.socketio = socketio
 
     def get_game(self):
         # The state is the entire game object
+        print("GAME SELF", self.game)
         return self.game
 
     def get_player_num(self):
         return self.player_num
 
-    def connect(self):
-        try:
-            print("hiya friend")
-            self.client.connect(self.addr)
-            game, player_num = pickle.loads(self.client.recv(15000))
-            return game, player_num
-        except:
-            pass
-
     def send(self, data):
-        try:
-            # Send the current game object
-            self.client.send(pickle.dumps(data))
-            data = pickle.loads(self.client.recv(15000))
-            game, _ = data
-            return game
-        except socket.error as e:
-            print(e)
+        game_json = {"GameObject": self.game.to_json()}
+        self.socketio.emit('game', game_json)
 
-    def receive(self):
-        try:
-            game, _ = pickle.loads(self.client.recv(15000))
-            return game
-        except socket.error as e:
-            print(e)
+    def display_message(self, message):
+        json = {"user_name": "computer", "message": message}
+        self.socketio.emit('my response', json, room=self.user_room_code)
+
+    # @self.socketio.on('game')
+    # def receive(self, json, methods=['GET', 'POST']):
+    #

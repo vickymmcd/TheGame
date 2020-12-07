@@ -1,39 +1,49 @@
-import pygame
 from game import Game
 from network import Network
 
-network = Network()
-game = network.get_game()
-player_number = network.get_player_num()
-print("Welcome! You are player " + str(player_number))
-while not game.gameover:
-    if game.curr_turn == player_number:
+def theGame(game, player_num, user_room_code, socketio, user_plays):
+    print("GAME", game)
+    network = Network(game, player_num, user_room_code, socketio)
+    game = network.get_game()
+    player_number = network.get_player_num()
+    #print("Welcome! You are player " + str(player_number))
+    while not game.gameover:
+        print(game.curr_turn)
+        if game.curr_turn == player_number:
 
-        game.gameover = game.take_turn(game.players[player_number])
-        if game.gameover:
-            game = network.send((game, player_number))
-            break
-        game.players[player_number].end_turn()
+            socketio.emit('get_next_move', {}, room=user_room_code)
+            while user_plays.get_play(player_num) is None:
+                pass
+            print("in a miracle, i got the updated play")
+            pile_idx, card_idx = user_plays.get_play(player_num)
+            game.gameover = game.take_turn(game.players[player_number], pile_idx, card_idx)
+            if game.gameover:
+                network.send((game, player_number))
+                break
+            game.players[player_number].end_turn()
 
-        game.curr_turn = (game.curr_turn + 1) % game.num_players
+            game.curr_turn = (game.curr_turn + 1) % game.num_players
 
-        game = network.send((game, player_number))
+            network.send((game, player_number))
 
-    else:
-        if game.curr_turn == -1:
-            print("Waiting for more players to join..")
-            print("If you would like to start indicate this on the server!")
         else:
-            print("Wait for player " + str(game.curr_turn) + " to take their turn!")
-        game = network.receive()
+            if game.curr_turn == -1:
+                network.display_message("waiting for more players to join..")
+                network.display_message("if you would like to start now, type 'ready'")
+                while game.curr_turn == -1:
+                    # wait until the game starts!
+                    pass
+            else:
+                network.display_message("wait for player " + users[game.curr_turn] + " to take their turn!")
+            #game = network.receive()
 
-    if len(game.deck.get_deck_list()) == 0:
-        game.gameover = True
-        game = network.send((game, player_number))
+        if len(game.deck.get_deck_list()) == 0:
+            game.gameover = True
+            network.send((game, player_number))
 
-print("Game ended with " + str(len(game.deck.get_deck_list())) + " cards left in the deck")
+    network.display_message("Game ended with " + str(len(game.deck.get_deck_list())) + " cards left in the deck")
 
-if len(game.deck.get_deck_list()) > 0:
-    print("Game over, yall lost.")
-elif len(game.deck.get_deck_list()) == 0:
-    print("Congrats! Yall beat The Game!!")
+    if len(game.deck.get_deck_list()) > 0:
+        network.display_message("Game over, yall lost.")
+    elif len(game.deck.get_deck_list()) == 0:
+        network.display_message("Congrats! Yall beat The Game!!")

@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block content %}
+
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <title>Flask_Chat_App</title>
+  </head>
+  <body>
+    <h1>User: {{ current_user.username }}</h1>
+    <h3 style='color: #ccc;font-size: 30px;'>No message yet..</h3>
+    <div class="message_holder"></div>
+
+    <form action="" method="POST">
+      <input type="text" class="message" placeholder="Messages"/>
+      <input type="submit"/>
+    </form>
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.min.js"></script>
+    <script type="text/javascript">
+      var socket = io.connect('http://' + document.domain + ':' + location.port);
+      var waiting_for_pile_idx = false
+      var waiting_for_card_idx = false
+
+      socket.on( 'connect', function() {
+        socket.emit( 'joined', {
+          user_name: "{{current_user.username}}",
+          data: 'User Connected'
+        } )
+        var form = $( 'form' ).on( 'submit', function( e ) {
+          e.preventDefault()
+          let user_name = "{{current_user.username}}"
+          let user_input = $( 'input.message' ).val()
+          if (waiting_for_pile_idx) {
+            console.log('yup')
+            socket.emit('pile_idx', {
+              user_name : user_name,
+              pile_idx : user_input
+            })
+            $( 'div.message_holder' ).append( '<div><b style="color: #000">'+"computer"+'</b> '+"Input index of card to play:"+'</div>' )
+            waiting_for_pile_idx = false
+            waiting_for_card_idx = true
+          } else if (waiting_for_card_idx) {
+            console.log('nope')
+            socket.emit('card_idx', {
+              user_name : user_name,
+              card_idx : user_input
+            })
+            waiting_for_card_idx = false
+          } else {
+            console.log(waiting_for_pile_idx)
+            console.log('not even funny')
+            socket.emit( 'my event', {
+              user_name : user_name,
+              message : user_input
+            } )
+          }
+          $( 'input.message' ).val( '' ).focus()
+        } )
+      } )
+      socket.on('get_next_move', function(msg) {
+        $( 'div.message_holder' ).append( '<div><b style="color: #000">'+"computer"+'</b> '+"Input pile index to place card on:"+'</div>' )
+        console.log("hiya friendo!")
+        waiting_for_pile_idx = true
+      })
+      socket.on( 'my response', function( msg ) {
+        console.log( msg )
+        if( typeof msg.user_name !== 'undefined' ) {
+          $( 'h3' ).remove()
+          $( 'div.message_holder' ).append( '<div><b style="color: #000">'+msg.user_name+'</b> '+msg.message+'</div>' )
+        }
+      })
+    </script>
+
+  </body>
+  </html>
+  {% endblock %}
